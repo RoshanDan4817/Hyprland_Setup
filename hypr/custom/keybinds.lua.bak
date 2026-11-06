@@ -1,0 +1,6 @@
+-- ==========================================
+-- Custom Keybindings Configuration
+-- ==========================================
+
+hl.bind("ALT + Tab", function() hl.dispatch(hl.dsp.window.cycle_next()) hl.dispatch(hl.dsp.window.bring_to_top()) end, { repeating = true, description = "Window: Cycle next" })
+hl.bind("ALT + SHIFT + Tab", hl.dsp.window.cycle_next({ next = false }), { repeating = true, description = "Window: Cycle previous" })

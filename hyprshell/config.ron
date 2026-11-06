@@ -1,0 +1,11 @@
+// Edit with `hyprshell config edit`
+(
+    version: 4,
+    windows: (
+        scale: 8.5,
+        items_per_row: 5,
+        overview: None,
+	switch: None,
+        switch_2: None,
+    ),
+)
