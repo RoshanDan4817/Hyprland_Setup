@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Restore configs from a hypr-backup snapshot. Current state is snapshotted first.
+set -euo pipefail
+
+BACKUP_DIR="$HOME/Documents/Hyprland_Setup"
+rev="${1:?usage: hypr-restore <commit>   list snapshots: git -C ~/Documents/Hyprland_Setup log --oneline}"
+
+cd "$BACKUP_DIR"
+if ! rev=$(git rev-parse --verify -q "$rev^{commit}"); then
+    echo "hypr-restore: unknown snapshot '${1}' in $BACKUP_DIR" >&2
+    exit 1
+fi
+
+"$HOME/.local/bin/hypr-backup"
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+git archive "$rev" | tar -x -C "$tmp"
+
+for name in hypr quickshell illogical-impulse hyprshell; do
+    [ -d "$tmp/$name" ] || continue
+    rm -rf "${HOME:?}/.config/$name"
+    cp -a "$tmp/$name" "$HOME/.config/$name"
+    echo "hypr-restore: restored ~/.config/$name from $rev"
+done
+
+hyprctl reload >/dev/null && echo "hypr-restore: Hyprland reloaded. Restart the shell with Ctrl+Super+R."

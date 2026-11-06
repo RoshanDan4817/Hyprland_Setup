@@ -1,0 +1,9 @@
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = *
+
+[Action]
+Description = Snapshotting Hyprland config before upgrade...
+When = PreTransaction
+Exec = /usr/bin/runuser -l roshand -c /home/roshand/.local/bin/hypr-backup

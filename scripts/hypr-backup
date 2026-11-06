@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Snapshot Hyprland + shell configs into a git repo. Each run = one commit you can restore.
+set -euo pipefail
+
+BACKUP_DIR="$HOME/Documents/Hyprland_Setup"
+SOURCES=(hypr quickshell illogical-impulse hyprshell)
+
+mkdir -p "$BACKUP_DIR"
+cd "$BACKUP_DIR"
+if [ ! -d .git ]; then
+    git init -q
+    git config user.name "hypr-backup"
+    git config user.email "hypr-backup@localhost"
+fi
+
+for d in "${SOURCES[@]}"; do
+    src="$HOME/.config/$d"
+    if [ ! -d "$src" ]; then
+        echo "hypr-backup: skipped missing dir $src" >&2
+        continue
+    fi
+    rm -rf "${BACKUP_DIR:?}/$d"
+    cp -a "$src" "$BACKUP_DIR/$d"
+    find "$BACKUP_DIR/$d" -name .git -prune -exec rm -rf {} +
+done
+
+git add -A
+if git diff --cached --quiet; then
+    echo "hypr-backup: no changes since last snapshot"
+    exit 0
+fi
+
+ver=$(pacman -Q hyprland 2>/dev/null | awk '{print $2}' || true)
+git commit -qm "snapshot $(date '+%F %T') hyprland ${ver:-unknown}"
+echo "hypr-backup: saved $(git rev-parse --short HEAD)"
